@@ -14,14 +14,14 @@ The core of this project is the Dual-Stream mechanism. As CT and MRI represent f
 
 ## Key Innovations
 
-* **Dual-Stream Architecture:** Features two specialized parallel encoding branches.
-  * *CT Stream (Geometric Encoder):* Extracts rigid anatomical landmarks and bony boundaries.
-  * *MRI Stream (Semantic Encoder):* Extracts soft-tissue semantic features and inter-organ contrast.
-* **Late Fusion Mechanism:** Multi-modal information is merged via channel concatenation only at the network's deepest bottleneck ($128\times128$ resolution) to prevent feature interference from shallow layers.
-* **Advanced Preprocessing Pipeline:**
-  * CT Scans: Soft-tissue windowing ($WL=40$ HU, $WW=400$ HU) to eliminate bone/air noise.
-  * MRI Scans: Percentile clipping (1st to 99th percentile) to suppress extreme bright artifacts.
-  * Normalization: Min-Max normalization to a [0, 1] continuous range.
+ **Dual-Stream Architecture:** Features two specialized parallel encoding branches.
+  - *CT Stream (Geometric Encoder):* Extracts rigid anatomical landmarks and bony boundaries.
+  - *MRI Stream (Semantic Encoder):* Extracts soft-tissue semantic features and inter-organ contrast.
+ **Late Fusion Mechanism:** Multi-modal information is merged via channel concatenation only at the network's deepest bottleneck ($128\times128$ resolution) to prevent feature interference from shallow layers.
+ **Advanced Preprocessing Pipeline:**
+  - CT Scans: Soft-tissue windowing ($WL=40$ HU, $WW=400$ HU) to eliminate bone/air noise.
+  - MRI Scans: Percentile clipping (1st to 99th percentile) to suppress extreme bright artifacts.
+  - Normalization: Min-Max normalization to a [0, 1] continuous range.
 
 ## Tackling Class Imbalance with Hybrid Loss
 
