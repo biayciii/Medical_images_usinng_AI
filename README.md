@@ -1,64 +1,53 @@
-# Dual-Stream Late Fusion U-Net for Head and Neck Tumor Segmentation
+# GAN-Augmented Dual-Stream Late Fusion U-Net for Medical Image Segmentation
 
-This repository contains the implementation of a sophisticated Deep Learning framework designed for the precise segmentation of Organs at Risk (OARs), specifically the Brainstem, in the head and neck region. By leveraging a Dual-Stream Late Fusion U-Net architecture, the system directly processes and fuses multi-modal medical imaging (CT and T1-weighted MRI) without relying on synthetic data generation.
+## 📌 Overview
+[cite_start]This repository contains the official implementation of a hybrid framework that integrates a Generative Adversarial Network (GAN) with a Dual-Stream Late Fusion Segmentation Network[cite: 3]. [cite_start]The system is designed to address the challenges of soft-tissue segmentation in Computed Tomography (CT) scans, specifically targeting the brainstem[cite: 26, 30]. [cite_start]By synthetically generating the missing MRI modality from the PDDCA dataset, the model significantly enhances segmentation performance and accuracy[cite: 4].
 
-## System Architecture
+## ⚙️ Architecture
 
-The core of this project is the Dual-Stream mechanism. As CT and MRI represent fundamentally different physical properties, we keep their feature extraction independent before late-stage integration.
+### Proposed Dual-Stream Late Fusion Network
+![Proposed Dual-Stream Late Fusion Architecture](image/CT-Trang1.drawio.png)
 
-### Proposed Late Fusion Pipeline
-![Proposed Architecture](image/CT-Trang1.drawio.png)
+[cite_start]The proposed workflow consists of three interconnected pipelines[cite: 5]:
+1. [cite_start]**GAN-based MRI Synthesis:** A Generative Adversarial Network trained on an external unpaired MRI dataset learns the domain adaptation mapping from CT to MRI[cite: 11, 12]. [cite_start]During inference, the U-Net based Generator takes preprocessed CT images as input to synthesize the corresponding "Synthetic MRI"[cite: 51, 52, 53].
+2. [cite_start]**Dual-Stream Late Fusion U-Net:** A segmentation network featuring two specialized parallel encoding branches[cite: 73, 74]:
+   * [cite_start]**CT Stream (Geometric Encoder):** Processes the original CT data to extract high-fidelity geometric features, such as bony boundaries and rigid landmarks[cite: 75, 76].
+   * [cite_start]**sMRI Stream (Semantic Encoder):** Processes the Synthetic MRI to extract soft-tissue semantic features and inter-organ contrast information[cite: 78, 79].
+3. [cite_start]**Late Fusion & Decoding:** The distinct feature maps from both streams are merged via channel concatenation at the network's Bottleneck (maintaining a 128x128 spatial dimension) before being upsampled by the Decoder to reconstruct the final predicted mask[cite: 84, 85, 86, 87].
 
 ### Baseline Single-Channel U-Net (For Comparison)
-![Baseline U-Net](image/baseline.png)
+![Baseline U-Net Architecture](image/baseline.png)
 
-## Key Innovations
+[cite_start]For performance comparison, a standard single-channel U-Net was implemented to process the CT images directly[cite: 165, 166].
 
- **Dual-Stream Architecture:** Features two specialized parallel encoding branches.
-  - *CT Stream (Geometric Encoder):* Extracts rigid anatomical landmarks and bony boundaries.
-  - *MRI Stream (Semantic Encoder):* Extracts soft-tissue semantic features and inter-organ contrast.
- **Late Fusion Mechanism:** Multi-modal information is merged via channel concatenation only at the network's deepest bottleneck ($128\times128$ resolution) to prevent feature interference from shallow layers.
- **Advanced Preprocessing Pipeline:**
-  - CT Scans: Soft-tissue windowing ($WL=40$ HU, $WW=400$ HU) to eliminate bone/air noise.
-  - MRI Scans: Percentile clipping (1st to 99th percentile) to suppress extreme bright artifacts.
-  - Normalization: Min-Max normalization to a [0, 1] continuous range.
+## 🗄️ Dataset Preparation
+[cite_start]The system utilizes two distinct datasets to train the Generative and Segmentation networks separately[cite: 26]:
+* [cite_start]**Source Domain (Segmentation):** The PDDCA 2015 dataset (MICCAI 2015 Head and Neck Auto-Segmentation Challenge), comprising 3D CT scans from 48 patients[cite: 27, 29]. 
+* [cite_start]**Target Domain (GAN Training):** Brain MRI Images dataset (Kaggle), comprising approximately 3,000 unpaired MRI slices to learn the MRI intensity distribution[cite: 31, 32, 33].
 
-## Tackling Class Imbalance with Hybrid Loss
+## 🧮 Loss Function
+[cite_start]To overcome extreme class imbalance where the background class constitutes over 98% of the image area, the network is optimized using a Hybrid Loss strategy[cite: 96, 103]:
 
-Medical image segmentation suffers from extreme class imbalance (target organs often occupy $<2\%$ of total voxels). To prevent the model from collapsing into a trivial local minimum, we implemented a custom Hybrid Loss strategy. 
+[cite_start]$L_{Total} = \lambda_1 L_{BCE} + \lambda_2 L_{Dice}$ [cite: 105]
 
-The total objective function synergizes Binary Cross Entropy (BCE) for gradient stability and Dice Loss for boundary refinement:
+[cite_start]This objective function combines Binary Cross Entropy (BCE) to establish a smooth error surface for rapid convergence, and Dice Loss to heavily penalize False Negatives on small target structures, forcing the network to learn detailed boundary features[cite: 116, 124].
 
-$\mathcal{L}_{Total}=\lambda_{1}\mathcal{L}_{BCE}+\lambda_{2}\mathcal{L}_{Dice}$
+## 📊 Experimental Results
+[cite_start]The Late Fusion Multi-modal model was evaluated against a single-channel Baseline U-Net over 200 training epochs[cite: 169, 191]:
 
-## Dataset
-
-The model is trained and validated on the public **HaN-Seg (Head and Neck Segmentation)** dataset, utilizing perfectly paired and spatially registered 3D scans from 42 patients. The 3D volumes were processed as 2D slices resized to $256\times256$ pixels.
-
-## Performance & Quantitative Results
-
-The Late Fusion approach demonstrated a significant breakthrough in accuracy compared to a standard single-modality Baseline U-Net.
-
-| Model | Input Modality | Validation Dice Score |
+| Metric | Baseline U-Net (CT Only) | Late Fusion U-Net (Proposed) |
 | :--- | :--- | :--- |
-| Baseline U-Net | CT Only | 96.58% |
-| **Proposed U-Net** | **CT + MRI (Late Fusion)** | **97.43%** |
+| **Accuracy** | [cite_start]99.81% [cite: 171] | [cite_start]99.97% [cite: 193] |
+| **F1-Score** | [cite_start]84.38% [cite: 171] | [cite_start]97.50% [cite: 193] |
+| **Best Dice Score** | [cite_start]96.58% [cite: 171] | [cite_start]97.50% [cite: 193] |
+| **Train Loss** | [cite_start]36.69% [cite: 171] | [cite_start]2.87% [cite: 193] |
+| **Val Loss** | [cite_start]39.04% [cite: 171] | [cite_start]3.40% [cite: 193] |
 
-*Clinical Note: The model achieved these results on a strict patient-level split (unseen patients), confirming its high robustness and clinical viability.*
+**Key Findings:**
+* [cite_start]**Faster Convergence:** The proposed model demonstrated exceptional stability, with the training loss dropping rapidly to 0.0287 within the first 5 epochs[cite: 196, 197].
+* [cite_start]**Enhanced Feature Extraction:** The Fusion model achieved a training loss reduction of approximately 45% compared to the baseline[cite: 200].
 
-## Qualitative Visual Results
-
-The visual outputs confirm the model's exceptional precision in localizing and delineating the brainstem with smooth, continuous contours that closely mirror expert annotations.
-
+### Visual Evaluation
 ![Segmentation Visual Results](image/case_12_slice_100.png)
-*From left to right: (1) Preprocessed CT input, (2) Preprocessed T1-weighted MRI input, (3) Expert-annotated Ground Truth mask, and (4) The Predicted Mask generated by our model.*
 
-## Setup and Execution
-
-```bash
-git clone [https://github.com/your-username/han-seg-late-fusion.git](https://github.com/your-username/han-seg-late-fusion.git)
-cd han-seg-late-fusion
-pip install -r requirements.txt
-
-# Run the training pipeline
-python src/train.py --dataset han_seg_dir
+[cite_start]Visual evaluations confirm that the multi-modal approach resolves segmentation ambiguities well, maintaining highly accurate predictions for positive cases while effectively demonstrating high specificity on negative cases[cite: 226, 248].
