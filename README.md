@@ -1,9 +1,9 @@
 # GAN-Augmented Dual-Stream Late Fusion U-Net for Medical Image Segmentation
 
-## 📌 Overview
+## Overview
 [cite_start]This repository contains the official implementation of a hybrid framework that integrates a Generative Adversarial Network (GAN) with a Dual-Stream Late Fusion Segmentation Network[cite: 3]. [cite_start]The system is designed to address the challenges of soft-tissue segmentation in Computed Tomography (CT) scans, specifically targeting the brainstem[cite: 26, 30]. [cite_start]By synthetically generating the missing MRI modality from the PDDCA dataset, the model significantly enhances segmentation performance and accuracy[cite: 4].
 
-## ⚙️ Architecture
+## Architecture
 
 ### Proposed Dual-Stream Late Fusion Network
 ![Proposed Dual-Stream Late Fusion Architecture](image/CT-Trang1.drawio.png)
@@ -20,19 +20,19 @@
 
 [cite_start]For performance comparison, a standard single-channel U-Net was implemented to process the CT images directly[cite: 165, 166].
 
-## 🗄️ Dataset Preparation
+## Dataset Preparation
 [cite_start]The system utilizes two distinct datasets to train the Generative and Segmentation networks separately[cite: 26]:
 * [cite_start]**Source Domain (Segmentation):** The PDDCA 2015 dataset (MICCAI 2015 Head and Neck Auto-Segmentation Challenge), comprising 3D CT scans from 48 patients[cite: 27, 29]. 
 * [cite_start]**Target Domain (GAN Training):** Brain MRI Images dataset (Kaggle), comprising approximately 3,000 unpaired MRI slices to learn the MRI intensity distribution[cite: 31, 32, 33].
 
-## 🧮 Loss Function
+## Loss Function
 [cite_start]To overcome extreme class imbalance where the background class constitutes over 98% of the image area, the network is optimized using a Hybrid Loss strategy[cite: 96, 103]:
 
 [cite_start]$L_{Total} = \lambda_1 L_{BCE} + \lambda_2 L_{Dice}$ [cite: 105]
 
 [cite_start]This objective function combines Binary Cross Entropy (BCE) to establish a smooth error surface for rapid convergence, and Dice Loss to heavily penalize False Negatives on small target structures, forcing the network to learn detailed boundary features[cite: 116, 124].
 
-## 📊 Experimental Results
+## Experimental Results
 [cite_start]The Late Fusion Multi-modal model was evaluated against a single-channel Baseline U-Net over 200 training epochs[cite: 169, 191]:
 
 | Metric | Baseline U-Net (CT Only) | Late Fusion U-Net (Proposed) |
