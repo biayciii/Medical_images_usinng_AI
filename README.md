@@ -10,7 +10,7 @@ The core of this project is the Dual-Stream mechanism. As CT and MRI represent f
 ![Proposed Architecture](image/CT-Trang1.drawio.png)
 
 ### Baseline Single-Channel U-Net (For Comparison)
-![Baseline U-Net](image/baseline Unet.drawio (1).png)
+![Baseline U-Net](image/baseline.png)
 
 ## Key Innovations
 
